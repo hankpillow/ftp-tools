@@ -1,11 +1,11 @@
 FTP-TOOLS
 =========
 
-This is just a bunch os bash script to help doing ftp via command line.
+This is just a bunch os bash script to help doing ftp via command line.  
+It's pretty much simple, basically it needs a ftp.config file in the same path as you call any script.  
+To work fine, the target server must allow ssh access.  
 
-It's pretty much simple, basically it needs a ftp.config file in the same path as you call any script.
-
-### *Every script has its own helpers, so type "scriptname ?" and enjoy.* ###
+#### Every script has its own helpers, so type "scriptname ?" and enjoy.####
 
 ##test-config##
 *Tests/Creates the ftp.config*
@@ -44,6 +44,7 @@ ex: **run "ls -lR static/"**
 TO-DO:
 ------
 - improve the ftp.config to allow multiples remote servers for the purpose of tests and final deploying.
+- improve the ftp.config to allow connecting via specific ports.
 
 INSTALL:
 ------
