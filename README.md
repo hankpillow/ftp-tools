@@ -16,28 +16,28 @@ connect
 
 put
 -----
-*Deploy a file or an entire folder to the remote server.  *
+*Deploy a file or an entire folder to the remote server.*  
 ex: **put local-folder/. static/**  
 ex: **put file-name static/bin/**
 
 local-md5
 ---------
-*Runs the MD5 in every file in the given scope  *
+*Runs the MD5 in every file in the given scope*  
 ex: **local-md5 local-folder/**
 
 remote-md5
 ----------
-*Runs the 'local-md5' in the remote server.  *
+*Runs the 'local-md5' in the remote server.*  
 ex: **remote-md5 static/**
 
 check-md5
 -----------
-*Compares the MD5 in the remote and local path and shows a report  *
+*Compares the MD5 in the remote and local path and shows a report*  
 ex: **check-md5 local-folder/ static/**
 
 run
 -----------
-*Executes the given argument as script in the remote server.  *
+*Executes the given argument as script in the remote server.*  
 ex: **run "ls -lR static/"**
 
 
