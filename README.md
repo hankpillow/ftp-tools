@@ -34,11 +34,11 @@ Compares the MD5 in the remote and local path and shows a report
 
 TO-DO:
 ------
-- improve the ftp.config to allow multiples servers remote servers for the purpose of test servers and final deploying.
+- improve the ftp.config to allow multiples remote servers for the purpose of tests and final deploying.
 
 INSTALL:
 ------
-- cd ~/bin
-- git clone git@github.com:hankpillow/ftp-tools.git
-- cd chmod +x ~/bin/ftp-tools
-- export PATH="~/bin/ftp-tools:${PATH}"
+1. cd ~/bin
+2. git clone git@github.com:hankpillow/ftp-tools.git
+3. cd chmod +x ~/bin/ftp-tools
+4. export PATH="~/bin/ftp-tools:${PATH}"
