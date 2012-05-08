@@ -1,0 +1,46 @@
+# !/bin/bash
+if [ "$1" = "?" ]
+	then
+		B1="\033[1m";
+		B2="\033[0m";
+		echo -e "";
+		echo -e "${B1}AUTHOR${B2}";
+		echo -e "  Igor almeida";
+		echo -e "";
+		echo -e "${B1}INFO${B2}";
+		echo -e "  Checks whether the ftp.config is created and if its filled properly.";
+		echo -e "  When not found, the ftp.config is created in the scope as the script was called.";
+		echo -e "  It returns nothing when no warning or error is found.";
+		echo -e "";
+		echo -e "${B1}USAGE${B2}";
+		echo -e "  test-config";
+		echo -e "";
+		exit 1;
+fi
+
+# defines the target name and place
+ftp_config=$(echo `pwd`)"/ftp.config"
+
+# flag to see whether ready or not.
+ready=0
+
+# checking if the file already exists
+if [ -e "$ftp_config" ]
+then
+	. "$ftp_config"
+	if [ -z "$host" -o -z "$user" ];
+	then
+		echo -e "==============\nERROR: Fill the $ftp_config properly.\nhost:'$host'\nuser:'$user'\n=============="
+		exit;
+	else
+		if [ -z "$(echo "$root" | grep '/$')" ];
+			then
+			echo -e "WARNING: Would be better if the the 'root' param end up with a slash '/'.\nYour root is: $root"
+		fi
+		ready=1	
+	fi
+else
+	# creates a new file from the template.
+	echo -e "A new '$ftp_config' file will be created. Fill it with the proper values."
+	echo -e "host=\"\"\nuser=\"\"\nroot=\"\"" >> $ftp_config
+fi

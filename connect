@@ -1,0 +1,25 @@
+# !/bin/bash
+if [ "$1" = "?" ]
+	then
+		B1="\033[1m";
+		B2="\033[0m";
+		echo -e "";
+		echo -e "${B1}AUTHOR${B2}";
+		echo -e "  Igor almeida";
+		echo -e "";
+		echo -e "${B1}INFO${B2}";
+		echo -e "  Connects into the remote server via ssh using the data set into the ftp.config file.";
+		echo -e "";
+		echo -e "${B1}USAGE${B2}";
+		echo -e "  connect";
+		echo -e "";
+		exit 1;
+fi
+
+dirname=`dirname $0`
+. "$dirname/test-config"
+if [ "$ready" -eq 1 ];
+	then
+		echo "Connecting to host:$host"
+		ssh $user@$host
+fi

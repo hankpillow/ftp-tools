@@ -1,0 +1,79 @@
+# !/bin/bash
+if [ "$1" = "?" ]
+	then
+		B1="\033[1m";
+		B2="\033[0m";
+		echo -e "";
+		echo -e "${B1}AUTHOR${B2}";
+		echo -e "  Igor almeida";
+		echo -e "";
+		echo -e "${B1}INFO${B2}";
+		echo -e "  Compares the MD5 in the remote and local path and shows a report";
+		echo -e "";
+		echo -e "${B1}USAGE${B2}";
+		echo -e "  check-md5";
+		echo -e "  -> compares all te files into the current folder with the remote root path";
+		echo -e "";
+		echo -e "${B1}EXAMPLES${B2}";
+		echo -e "  check-md5 local-folder";
+		echo -e "  -> compares all files in 'local-folder' with the remote 'root/local-folder'";
+		echo -e "";
+		echo -e "  check-md5 local-folder remote-folder";
+		echo -e "  -> compares all files in 'local-folder' with the remote 'root/remote-folder'";
+		echo -e "";
+		exit 1;
+fi
+
+dirname=`dirname $0`
+. "$dirname/test-config"
+
+# create remote and local log names
+timestamp=`date +%F-%s`
+local_log="local_$timestamp.md5log"
+remote_log="remote_$timestamp.md5log"
+
+# function to analyse reports.
+function compare {
+	total=0
+	err=0
+	cat "$1" | {
+		while read line; do 
+			match=`cat "$2" | grep "$line" | awk '{ print $1 }'`
+			if [ -z $match ];
+			then
+				e=$e"$line\n"
+				err=$(($err+1))
+			else
+				s=$s"$line\n"
+			fi
+			total=$(($total+1))
+		done
+		if [ "$total" -eq "0" ];
+		then
+			result="000"
+		else
+			result=`echo 100-$err/$total*100 | bc`
+			result=`printf %03d $result`
+		fi
+		echo -e "┃ $result% matching.        ┃\n┗━━━━━━━━━━━━━━━━━━━━━━━┛"
+		echo -e "MD5 @ SCOPE: '$3'\n"
+		echo -e "[!] FILES NOT MATCHING [$err]\n"$e
+		echo -e "[+] FILES MATCHING [$(($total-$err))]\n"$s;
+	}
+}
+
+# checking ssh credencials
+if [ "$ready" -eq 1 ];
+	then
+
+	. "$dirname/remote-md5" >> "$remote_log"
+	. "$dirname/local-md5" >> "$local_log"
+
+	echo -e "\n┏━━━━━━━━━━━━━━━━━━━━━━━┓\n┃ LOCAL X REMOTE        ┃"
+	compare "$local_log" "$remote_log" "$1"
+
+	echo -e "┏━━━━━━━━━━━━━━━━━━━━━━━┓\n┃ REMOTE X LOCAL        ┃"
+	compare "$remote_log" "$local_log" "$root$2"
+	
+	rm *.md5log
+fi

@@ -1,0 +1,38 @@
+# !/bin/bash
+if [ "$1" = "?" ]
+	then
+		B1="\033[1m";
+		B2="\033[0m";
+		echo -e "";
+		echo -e "${B1}AUTHOR${B2}";
+		echo -e "  Igor almeida";
+		echo -e "";
+		echo -e "${B1}INFO${B2}";
+		echo -e "  Executes the given argument in the server";
+		echo -e "";
+		echo -e "${B1}USAGE${B2}";
+		echo -e "  run 'ls -lR1'";
+		echo -e "  -> runs the 'ls -lR1' in the remote server.";
+		echo -e "";
+		exit 1;
+fi
+
+dirname=`dirname $0`
+. "$dirname/test-config"
+
+code=$(echo -e "$1" | openssl enc -base64)
+
+if [ "$ready" -eq 1 ];
+	then
+	chunk=$(cat <<_EOF_
+if [ -d "$root$2" ];
+then
+	cd "$root$2"
+	echo -e "$code" | openssl enc -d -base64 | bash
+else
+	echo "WARNING: path not found: $root$2"
+fi
+_EOF_
+)
+	ssh $user@$host "$chunk"
+fi

@@ -1,0 +1,37 @@
+# !/bin/bash
+if [ "$1" = "?" ]
+	then
+		B1="\033[1m";
+		B2="\033[0m";
+		echo -e "";
+		echo -e "${B1}AUTHOR${B2}";
+		echo -e "  Igor almeida";
+		echo -e "";
+		echo -e "${B1}INFO${B2}";
+		echo -e "  Deploy a file or an enteri folder into the the remote server.";
+		echo -e "";
+		echo -e "${B1}USAGE${B2}";
+		echo -e "  put folder-name";
+		echo -e "";
+		echo -e "${B1}EXAMPLES${B2}";
+		echo -e "  put local-folder";
+		echo -e "  -> puts the 'local-folder' in the remote server at 'root' (see ftp.config)";
+		echo -e "";
+		echo -e "  put local-folder target-folder";
+		echo -e "  -> puts the 'local-folder' in the 'target-folder'";
+		echo -e "";
+		echo -e "  put local-folder/. target-folder";
+		echo -e "  -> puts the CONTENT of 'local-folder' in the 'target-folder' whithout putting the folder itself.";
+		echo -e "";
+		exit 1;
+fi
+
+dirname=`dirname $0`
+. "$dirname/test-config"
+
+# scp if everything is ok.
+if [ "$ready" -eq 1 ];
+	then
+	echo "Deploying $1 to host:$host$2"
+	scp -r $1 $user@$host:$root$2
+fi

@@ -1,0 +1,42 @@
+#!/bin/bash
+if [ "$1" = "?" ]
+	then
+		B1="\033[1m";
+		B2="\033[0m";
+		echo -e "";
+		echo -e "${B1}AUTHOR${B2}";
+		echo -e "  Igor almeida";
+		echo -e "";
+		echo -e "${B1}INFO${B2}";
+		echo -e "  Runs the MD5 in every file in the given scope";
+		echo -e "";
+		echo -e "${B1}USAGE${B2}";
+		echo -e "  local-md5";
+		echo -e "  -> checks the md5 for every file in '.'";
+		echo -e "";
+		echo -e "${B1}EXAMPLES${B2}";
+		echo -e "  local-md5 folder/";
+		echo -e "  -> check the md5 for every file in '/folder'";
+		exit 1;
+fi
+
+scope="$1"
+if [ -z "$scope" ];
+then
+	scope="."
+fi
+has_md5=`which md5`
+dname=`basename $scope`
+for file in `find $scope -type f -not -iwholename '*.md5log*'`
+do
+	if [ ! -d "$file" ];
+	then
+		if [ -n "$has_md5" ];
+			then
+				result=`md5 $file| awk '{print $2, $4}'`
+				echo ${result//$scope\//"./"}
+			else
+				md5sum $file| awk '{print "("$2")", $1}'
+		fi
+	fi
+done

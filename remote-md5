@@ -1,0 +1,31 @@
+# !/bin/bash
+if [ "$1" = "?" ]
+	then
+		B1="\033[1m";
+		B2="\033[0m";
+		echo -e "";
+		echo -e "${B1}AUTHOR${B2}";
+		echo -e "  Igor almeida";
+		echo -e "";
+		echo -e "${B1}INFO${B2}";
+		echo -e "  Run the 'local-md5' script in the remote server and ouputs the result";
+		echo -e "";
+		echo -e "${B1}USAGE${B2}";
+		echo -e "  Type local-md5 ?";
+		echo -e "";
+		exit 1;
+fi
+
+dirname=`dirname $0`
+. "$dirname/test-config"
+
+# copy and encode the scripts content
+read -d '' script <<EOF
+`cat "$dirname/local-md5"`
+EOF
+r_scope="$2"
+if [ -z "$r_scope" ];
+	then
+	r_scope="$1"
+fi
+run "$script" "$r_scope"
