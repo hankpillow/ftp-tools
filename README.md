@@ -3,7 +3,7 @@ FTP-TOOLS
 
 This is just a bunch os bash script to help doing ftp via command line.
 
-It's pretty much simple, basically it needs a ftp.config file in the same path as you call any of these script.
+It's pretty much simple, basically it needs a ftp.config file in the same path as you call any script.
 
 test-config
 -----------
