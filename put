@@ -8,7 +8,7 @@ if [ "$1" = "?" ]
 		echo -e "  Igor almeida";
 		echo -e "";
 		echo -e "${B1}INFO${B2}";
-		echo -e "  Deploy a file or an enteri folder into the the remote server.";
+		echo -e "  Deploy a file or an entire folder to the remote server.";
 		echo -e "";
 		echo -e "${B1}USAGE${B2}";
 		echo -e "  put folder-name";
