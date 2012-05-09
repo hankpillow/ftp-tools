@@ -52,7 +52,9 @@ function compare {
 		then
 			result="000"
 		else
-			result=`echo 100-$err/$total*100 | bc`
+			# echo "100-$err/$total*100" | bc -l
+			result=`echo 100-$err/$total*100 | bc -l`
+			result=`printf %0.0f $result`
 			result=`printf %03d $result`
 		fi
 		echo -e "┃ $result% matching.        ┃\n┗━━━━━━━━━━━━━━━━━━━━━━━┛"

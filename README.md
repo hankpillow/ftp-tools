@@ -1,6 +1,9 @@
 #### CHANGELOG ####
-.2012/09/05
-1- *download* command created.
+version: v0.1
+- *download* command created.
+
+version: v0.2
+- *check-md5* report fixed. the average calculation was wrong.
 
 
 FTP-TOOLS
