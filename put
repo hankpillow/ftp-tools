@@ -32,6 +32,6 @@ dirname=`dirname $0`
 # scp if everything is ok.
 if [ "$ready" -eq 1 ];
 	then
-	echo "Deploying $1 to host:$host$2"
+	echo "Deploying '$1' to: '$root$2'"
 	scp -r $1 $user@$host:$root$2
 fi
