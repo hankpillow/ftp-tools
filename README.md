@@ -1,3 +1,8 @@
+#### CHANGELOG ####
+.2012/09/05
+1- *download* command created.
+
+
 FTP-TOOLS
 =========
 
@@ -10,36 +15,33 @@ To work fine, the target server must allow ssh access.
 ##test-config##
 *Tests/Creates the ftp.config*
 
-connect
--------
+##connect##
 *Just an alias to ssh using the ftp.config settings.*
 
-put
------
+##put##
 *Deploy a file or an entire folder to the remote server.*  
 ex: **put local-folder/. static/**  
 ex: **put file-name static/bin/**
 
-local-md5
----------
+##download##
+*Download a file or an entire folder from the remote server.*  
+ex: **download remote-folder/. .**  
+
+##local-md5##
 *Runs the MD5 in every file in the given scope*  
 ex: **local-md5 local-folder/**
 
-remote-md5
-----------
+##remote-md5##
 *Runs the 'local-md5' in the remote server.*  
 ex: **remote-md5 static/**
 
-check-md5
------------
+##check-md5##
 *Compares the MD5 in the remote and local path and shows a report*  
 ex: **check-md5 local-folder/ static/**
 
-run
------------
+##run##
 *Executes the given argument as script in the remote server.*  
 ex: **run "ls -lR static/"**
-
 
 TO-DO:
 ------
