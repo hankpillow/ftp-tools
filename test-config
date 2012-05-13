@@ -1,4 +1,4 @@
-# !/bin/bash
+# !/bin/bash -x
 if [ "$1" = "?" ]
 	then
 		B1="\033[1m";
@@ -27,20 +27,67 @@ ready=0
 # checking if the file already exists
 if [ -e "$ftp_config" ]
 then
-	. "$ftp_config"
-	if [ -z "$host" -o -z "$user" ];
-	then
-		echo -e "==============\nERROR: Fill the $ftp_config properly.\nhost:'$host'\nuser:'$user'\n=============="
-		exit;
-	else
-		if [ -z "$(echo "$root" | grep '/$')" ];
-			then
-			echo -e "WARNING: Would be better if the the 'root' param end up with a slash '/'.\nYour root is: $root"
+
+	host=""
+	user=""
+	root=""
+	found=""
+
+	parse(){
+		host=$(echo -e "$found" | tr "\t" "\n" | grep -E 'host=' | tr '=' " " | awk '{print $2}')
+		user=$(echo -e "$found" | tr "\t" "\n" | grep -E 'user=' | tr '=' " " | awk '{print $2}')
+		root=$(echo -e "$found" | tr "\t" "\n" | grep -E 'root=' | tr '=' " " | awk '{print $2}')
+		if [ -z "$host" -o -z "$user" ];
+		then
+			echo -e "==============\nERROR: Fill the $ftp_config properly.\nhost:'$host'\nuser:'$user'\n=============="
+			exit 1;
+		else
+			if [ -z "$(echo "$root" | grep '/$')" ];
+				then
+				echo -e "WARNING: Would be better if the the 'root' param end up with a slash '/'.Your root is: $root"
+			fi
+			ready=1	
 		fi
-		ready=1	
+	}
+
+
+	envs=$( cat "$ftp_config" | grep -E '\[\w+]' | tr -s '\n')
+	raw=$( cat "$ftp_config" | tr -s '\n' | tr '\n' '{')
+	raw=$( echo ${raw//{[/"@["} )
+	raw=$( echo ${raw//{/"\t"} )
+	
+	declare -a chunk=()
+	for i in $(echo $raw | tr "@[" "\n[")
+	do
+		chunk=("${chunk[@]}" $i)
+	done
+
+	if [ ${#chunk[@]} -eq "0" ];
+		then
+		echo -e "==============\nERROR: Fill the $ftp_config properly.\nhost:'$host'\nuser:'$user'\n=============="
+	elif [ ${#chunk[@]} -eq "1" ];
+		then
+		found=${chunk[0]}
+		parse
+	else
+		echo "These are your environment options: "$envs""
+		echo -n "which one whould you like to use? "
+		read env;
+		for (( i = 0 ; i < ${#chunk[@]} ; i++ )) do
+			found=$(echo ${chunk[$i]} | grep -E "\[$env\]")
+			if [ -n "$found" ];
+				then
+				parse
+				break
+			fi
+		done
+		if [ -z "$found" ];
+		then
+			echo "Environment not found!"
+		fi
 	fi
 else
 	# creates a new file from the template.
 	echo -e "A new '$ftp_config' file will be created. Fill it with the proper values."
-	echo -e "host=\"\"\nuser=\"\"\nroot=\"\"" >> $ftp_config
+	echo -e "[final]\nhost=\nuser=\nroot=" >> $ftp_config
 fi
