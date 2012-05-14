@@ -29,14 +29,10 @@ fi
 dirname=`dirname $0`
 . "$dirname/test-config"
 
-# scp if everything is ok.
-if [ "$ready" -eq 1 ];
+target="$2"
+if [ -z "$target" ];
 	then
-	target="$2"
-	if [ -z "$target" ];
-		then
-		target="."
-	fi
-	echo "Downloading '$root$1' to '$target'"
-	scp -r $user@$host:$root$1 $target
+	target="."
 fi
+echo "Downloading '$root$1' to '$target'"
+scp -r $user@$host:$root$1 $target

@@ -11,6 +11,7 @@ if [ "$1" = "?" ]
 		echo -e "  Checks whether the ftp.config is created and if its filled properly.";
 		echo -e "  When not found, the ftp.config is created in the scope as the script was called.";
 		echo -e "  It returns nothing when no warning or error is found.";
+		echo -e "  Type 'parse-config ?' for more information.";
 		echo -e "";
 		echo -e "${B1}USAGE${B2}";
 		echo -e "  test-config";
@@ -18,74 +19,60 @@ if [ "$1" = "?" ]
 		exit 1;
 fi
 
-# defines the target name and place
 ftp_config=$(echo `pwd`)"/ftp.config"
 
-# flag to see whether ready or not.
-ready=0
-
-# checking if the file already exists
 if [ -e "$ftp_config" ]
 then
 
-	host=""
-	user=""
-	root=""
-	found=""
+	dirname=`dirname $0`
+	envs=$(. "$dirname/parse-config" $ftp_config)
 
-	parse(){
-		host=$(echo -e "$found" | tr "\t" "\n" | grep -E 'host=' | tr '=' " " | awk '{print $2}')
-		user=$(echo -e "$found" | tr "\t" "\n" | grep -E 'user=' | tr '=' " " | awk '{print $2}')
-		root=$(echo -e "$found" | tr "\t" "\n" | grep -E 'root=' | tr '=' " " | awk '{print $2}')
-		if [ -z "$host" -o -z "$user" ];
+	if [ -z "$envs" ];
 		then
-			echo -e "==============\nERROR: Fill the $ftp_config properly.\nhost:'$host'\nuser:'$user'\n=============="
-			exit 1;
-		else
-			if [ -z "$(echo "$root" | grep '/$')" ];
-				then
-				echo -e "WARNING: Would be better if the the 'root' param end up with a slash '/'.Your root is: $root"
-			fi
-			ready=1	
-		fi
-	}
+		echo -e "ERROR: Fill the $ftp_config properly."
+		exit 1;
+	fi
 
-
-	envs=$( cat "$ftp_config" | grep -E '\[\w+]' | tr -s '\n')
-	raw=$( cat "$ftp_config" | tr -s '\n' | tr '\n' '{')
-	raw=$( echo ${raw//{[/"@["} )
-	raw=$( echo ${raw//{/"\t"} )
-	
-	declare -a chunk=()
-	for i in $(echo $raw | tr "@[" "\n[")
-	do
-		chunk=("${chunk[@]}" $i)
-	done
-
-	if [ ${#chunk[@]} -eq "0" ];
-		then
-		echo -e "==============\nERROR: Fill the $ftp_config properly.\nhost:'$host'\nuser:'$user'\n=============="
-	elif [ ${#chunk[@]} -eq "1" ];
-		then
-		found=${chunk[0]}
-		parse
+	envs_arr=($(echo -e "$envs" | awk '{print $0 }'))
+	if [ ${#envs_arr[@]} == "1" ];
+	then
+		host=$(. "$dirname/parse-config" $ftp_config "$envs" host)
+		user=$(. "$dirname/parse-config" $ftp_config "$envs" user)
+		root=$(. "$dirname/parse-config" $ftp_config "$envs" root)
 	else
-		echo "These are your environment options: "$envs""
+		echo -e "These are your environment options: ($(echo "$envs" | tr "\t" ", "))"
 		echo -n "which one whould you like to use? "
-		read env;
-		for (( i = 0 ; i < ${#chunk[@]} ; i++ )) do
-			found=$(echo ${chunk[$i]} | grep -E "\[$env\]")
+		read input;
+
+		for (( i = 0 ; i < ${#envs_arr[@]} ; i++ )) do
+			found=$(echo ${envs_arr[$i]} | grep -E "$input")
 			if [ -n "$found" ];
-				then
-				parse
-				break
+			then
+				host=$(. "$dirname/parse-config" $ftp_config "$input" host)
+				user=$(. "$dirname/parse-config" $ftp_config "$input" user)
+				root=$(. "$dirname/parse-config" $ftp_config "$input" root)
+				break;
 			fi
 		done
+		
 		if [ -z "$found" ];
 		then
 			echo "Environment not found!"
+			exit 1;
 		fi
 	fi
+
+	if [ -z "$host" -o -z "$user" ];
+	then
+		echo -e "ERROR: Fill the $ftp_config properly."
+		exit 1;
+	else
+		if [ -z "$(echo "$root" | grep '/$')" ];
+			then
+			echo -e "WARNING: Would be better if the the 'root' param end up with a slash '/'.Your root is: $root"
+		fi
+	fi
+
 else
 	# creates a new file from the template.
 	echo -e "A new '$ftp_config' file will be created. Fill it with the proper values."

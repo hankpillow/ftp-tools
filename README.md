@@ -8,6 +8,9 @@ version: v0.2
 version: v0.3
 - ftp.config allowing multiples servers
 
+version: v0.4
+- *parse-config* created
+
 
 FTP-TOOLS
 =========
@@ -63,6 +66,10 @@ ex: **check-md5 local-folder/ static/**
 ##run##
 *Executes the given argument as script in the remote server.*  
 ex: **run "ls -lR static/"**
+
+##parse-config##
+*A simple config parser.*  
+ex: **parse-config file.conf env-name prop-name**
 
 TO-DO:
 ------

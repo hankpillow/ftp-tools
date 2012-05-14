@@ -17,15 +17,15 @@ if [ "$1" = "?" ]
 fi
 
 dirname=`dirname $0`
-. "$dirname/test-config"
 
-# copy and encode the scripts content
 read -d '' script <<EOF
 `cat "$dirname/local-md5"`
 EOF
+
 r_scope="$2"
 if [ -z "$r_scope" ];
 	then
 	r_scope="$1"
 fi
-run "$script" "$r_scope"
+
+. "$dirname/run" "$script" "$r_scope"

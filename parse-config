@@ -1,0 +1,107 @@
+# !/bin/bash
+if [ "$1" = "?" ]
+	then
+		B1="\033[1m";
+		B2="\033[0m";
+		echo -e "";
+		echo -e "${B1}AUTHOR${B2}";
+		echo -e "  Igor almeida";
+		echo -e "";
+		echo -e "${B1}INFO${B2}";
+		echo -e "  Parse the config and find values";
+		echo -e "  The config file must be formatted in the schema below";
+		echo -e "";
+		echo -e "  [env_name]";
+		echo -e "  prop1=value env 1";
+		echo -e "  prop2=value 2 env 1";
+		echo -e "";
+		echo -e "  [env_name2]";
+		echo -e "  prop1=value env 2";
+		echo -e "";
+		echo -e "${B1}USAGE${B2}";
+		echo -e "  parse-config file.config";
+		echo -e "";
+		echo -e "${B1}EXAMPLE${B2}";
+		echo -e "  parse-config ftp.config env_name";
+		echo -e "  -> returns:";
+		echo -e "  \t[env_name]";
+		echo -e "  \tprop1=value env 1";
+		echo -e "  \tprop2=value 2 env 1";
+		echo -e "";
+		echo -e "${B1}EXAMPLE${B2}";
+		echo -e "  parse-config ftp.config env_name prop1";
+		echo -e "  -> returns 'value env 1'"
+		echo -e "";
+		echo -e "${B1}EXAMPLE${B2}";
+		echo -e "  parse-config ftp.config";
+		echo -e "  -> returns"
+		echo -e "  \t[env_name]";
+		echo -e "  \t[env_name2]";
+		echo -e "";
+		exit 1;
+fi
+
+if [ ! -f "$1" ];
+then
+	echo "ERROR: file: '$1' not found."
+	exit 1;
+fi
+
+raw=$( cat "$1" | tr -s '\n' | tr '\n' '{')
+raw=$( echo ${raw//{[/"@["} )
+raw=$( echo ${raw//{/"\t"} )
+
+target_env="$2";
+target_prop="$3";
+
+current_env="";
+for line in $(echo $raw | tr "@[" "\n[")
+do
+	for item in $(echo -e "$line" | tr "\t" "\n")
+	do
+		e=$(echo "$item" | grep -E "\[$target_env\]")
+		if [ -n "$e" ];
+		then
+			current_env="$e";
+			if [ -z "$target_prop" ];
+			then
+				echo -e "$line" | tr "\t" "\n";
+				exit 1;
+			fi
+			continue;
+		fi
+		new_env=$(echo "$item" | grep -E "\[*\]")
+		if [ -n "$new_env" ];
+		then
+			current_env="";
+			continue;
+		fi
+		if [ -n "$current_env" ];
+		then
+			value=$(echo -e "$item" | grep -E "$target_prop=" | tr "=" "\t" | awk '{print $2}')
+			if [ -n "$value" ];
+			then
+				echo $value;
+				exit 1;
+			fi
+		fi
+	done
+done
+
+all_envs=""
+for line in $(cat $1)
+do
+	value=$(echo "$line" | grep -E "^\[[a-zA-Z0-9]+\]")
+	if [ -n "$value" ];
+	then
+		value=$(echo ${value//[/""})
+		value=$(echo ${value//]/""})
+		if [ -z "$all_envs" ];
+		then
+			all_envs="$value"
+		else
+			all_envs+="\t$value"
+		fi
+	fi
+done
+echo -e "$all_envs"

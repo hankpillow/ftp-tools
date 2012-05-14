@@ -18,13 +18,13 @@ if [ "$1" = "?" ]
 fi
 
 dirname=`dirname $0`
-. "$dirname/test-config"
+if [ -z "$user" -o -z "$host" ];
+	then
+	. "$dirname/test-config"
+fi
 
 code=$(echo -e "$1" | openssl enc -base64)
-
-if [ "$ready" -eq 1 ];
-	then
-	chunk=$(cat <<_EOF_
+chunk=$(cat <<_EOF_
 if [ -d "$root$2" ];
 then
 	cd "$root$2"
@@ -34,5 +34,4 @@ else
 fi
 _EOF_
 )
-	ssh $user@$host "$chunk"
-fi
+ssh $user@$host "$chunk"

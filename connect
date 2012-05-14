@@ -18,8 +18,6 @@ fi
 
 dirname=`dirname $0`
 . "$dirname/test-config"
-if [ "$ready" -eq 1 ];
-	then
-		echo "Connecting to host:$host"
-		ssh $user@$host
-fi
+
+echo "Connecting to host:$host"
+ssh $user@$host

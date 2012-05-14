@@ -64,18 +64,13 @@ function compare {
 	}
 }
 
-# checking ssh credencials
-if [ "$ready" -eq 1 ];
-	then
+. "$dirname/remote-md5" >> "$remote_log"
+. "$dirname/local-md5" >> "$local_log"
 
-	. "$dirname/remote-md5" >> "$remote_log"
-	. "$dirname/local-md5" >> "$local_log"
+echo -e "\n┏━━━━━━━━━━━━━━━━━━━━━━━┓\n┃ LOCAL X REMOTE        ┃"
+compare "$local_log" "$remote_log" "$1"
 
-	echo -e "\n┏━━━━━━━━━━━━━━━━━━━━━━━┓\n┃ LOCAL X REMOTE        ┃"
-	compare "$local_log" "$remote_log" "$1"
+echo -e "┏━━━━━━━━━━━━━━━━━━━━━━━┓\n┃ REMOTE X LOCAL        ┃"
+compare "$remote_log" "$local_log" "$root$2"
 
-	echo -e "┏━━━━━━━━━━━━━━━━━━━━━━━┓\n┃ REMOTE X LOCAL        ┃"
-	compare "$remote_log" "$local_log" "$root$2"
-	
-	rm *.md5log
-fi
+rm *.md5log
