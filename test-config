@@ -77,4 +77,5 @@ else
 	# creates a new file from the template.
 	echo -e "A new '$ftp_config' file will be created. Fill it with the proper values."
 	echo -e "[final]\nhost=\nuser=\nroot=" >> $ftp_config
+	exit 1;
 fi
