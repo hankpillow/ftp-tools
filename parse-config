@@ -43,13 +43,13 @@ fi
 
 if [ ! -f "$1" ];
 then
-	echo "ERROR: file: '$1' not found."
+	echo "ERROR: file: '$1' not found.";
 	exit 1;
 fi
 
-raw=$( cat "$1" | tr -s '\n' | tr '\n' '{')
-raw=$( echo ${raw//{[/"@["} )
-raw=$( echo ${raw//{/"\t"} )
+raw=$( cat "$1" | tr -s '\n' | tr '\n' '{');
+raw=$( echo ${raw//{[/"@["} );
+raw=$( echo ${raw//{/"\t"} );
 
 target_env="$2";
 target_prop="$3";
@@ -59,10 +59,11 @@ for line in $(echo $raw | tr "@[" "\n[")
 do
 	for item in $(echo -e "$line" | tr "\t" "\n")
 	do
-		e=$(echo "$item" | grep -E "\[$target_env\]")
+		e=$(echo "$item" | grep -E "\[$target_env\]");
 		if [ -n "$e" ];
 		then
 			current_env="$e";
+			# returns the whole chunk
 			if [ -z "$target_prop" ];
 			then
 				echo -e "$line" | tr "\t" "\n";
@@ -70,7 +71,7 @@ do
 			fi
 			continue;
 		fi
-		new_env=$(echo "$item" | grep -E "\[*\]")
+		new_env=$(echo "$item" | grep -E "\[*\]");
 		if [ -n "$new_env" ];
 		then
 			current_env="";
@@ -78,30 +79,44 @@ do
 		fi
 		if [ -n "$current_env" ];
 		then
-			value=$(echo -e "$item" | grep -E "$target_prop=" | tr "=" "\t" | awk '{print $2}')
+			# returns specific prop value
+			value=$(echo -e "$item" | grep -E "$target_prop=" | tr "=" "\t" | awk '{print $2}');
 			if [ -n "$value" ];
 			then
-				echo $value;
+				echo "$value";
 				exit 1;
 			fi
 		fi
 	done
 done
 
+# when a target prop is passed but has no value
+if [ -n "$target_prop" -a -z "$value" ];
+then
+	echo "";
+	exit 1;
+fi
+
+# find all envs
 all_envs=""
 for line in $(cat $1)
 do
-	value=$(echo "$line" | grep -E "^\[[a-zA-Z0-9]+\]")
+	value=$(echo "$line" | grep -E "^\[[a-zA-Z0-9-_]+\]");
 	if [ -n "$value" ];
 	then
-		value=$(echo ${value//[/""})
-		value=$(echo ${value//]/""})
+		value=$(echo ${value//[/""});
+		value=$(echo ${value//]/""});
 		if [ -z "$all_envs" ];
 		then
-			all_envs="$value"
+			all_envs="$value";
 		else
-			all_envs+="\t$value"
+			all_envs+="\t$value";
 		fi
 	fi
 done
-echo -e "$all_envs"
+# show nothing when any env is found.
+if [ -z "$all_envs" ];
+	then
+	exit 1;
+fi
+echo -e "$all_envs";
