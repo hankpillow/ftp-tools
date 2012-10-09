@@ -39,6 +39,7 @@ then
 		host=$(. "$dirname/parse-config" $ftp_config "$envs" host)
 		user=$(. "$dirname/parse-config" $ftp_config "$envs" user)
 		root=$(. "$dirname/parse-config" $ftp_config "$envs" root)
+		port=$(. "$dirname/parse-config" $ftp_config "$envs" port)
 	else
 		echo -e "These are your environment options: ($(echo "$envs" | tr "\t" ", "))"
 		echo -n "which one whould you like to use? "
@@ -51,6 +52,7 @@ then
 				host=$(. "$dirname/parse-config" $ftp_config "$input" host)
 				user=$(. "$dirname/parse-config" $ftp_config "$input" user)
 				root=$(. "$dirname/parse-config" $ftp_config "$input" root)
+				port=$(. "$dirname/parse-config" $ftp_config "$input" port)
 				break;
 			fi
 		done
@@ -76,6 +78,11 @@ then
 else
 	# creates a new file from the template.
 	echo -e "A new '$ftp_config' file will be created. Fill it with the proper values."
-	echo -e "[final]\nhost=\nuser=\nroot=" >> $ftp_config
+	echo -e "[final]\nhost=\nport=\nuser=\nroot=" >> $ftp_config
 	exit 1;
+fi
+
+if [ -n "$port" ]; then
+	shopt -s expand_aliases
+	alias ssh="ssh -p $port"
 fi
