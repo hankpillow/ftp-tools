@@ -101,7 +101,7 @@ fi
 all_envs=""
 for line in $(cat $1)
 do
-	value=$(echo "$line" | grep -E "^\[[a-zA-Z0-9-_]+\]");
+	value=$(echo "$line" | grep -E "^\[[a-zA-Z0-9\-_]+\]");
 	if [ -n "$value" ];
 	then
 		value=$(echo ${value//[/""});
