@@ -44,105 +44,117 @@ if [ "$1" = "?" ]
 		exit 1;
 fi
 
-if [ ! -f "$1" ];
-then
-	echo -e "\033[31mERROR:\033[0m Config file not found on: '$1'";
-	exit 1;
-fi
+function parse {
 
-target_env="$2";
-
-# ========================================
-# in case of not providing group name
-# ========================================
-if [ -z "$target_env" ];
-then
-	# ========================================
-	# find all envs
-	# ========================================
-	all_envs=""
-	for line in $(cat $1)
-	do
-		value=$(echo "$line" | grep -E "^\[[a-zA-Z0-9-_]+\]");
-		if [ -n "$value" ];
-		then
-			value=$(echo ${value//[/""});
-			value=$(echo ${value//]/""});
-			if [ -z "$all_envs" ];
-			then
-				all_envs="$value";
-			else
-				all_envs+="\n$value";
-			fi
-		fi
-	done
-
-	if [ -z "$all_envs" ];
-		then
-		echo -e "\033[35mAny group found!\033[0m\nHit parse-config ?";
-	else
-		echo -e "$all_envs";
+	if [ ! -f "$1" ];
+	then
+		echo -e "\033[31mERROR:\033[0m Config file not found on: '$1'";
+		exit 0;
 	fi
 
-	exit 1;
-fi
+	local target_env="$2";
 
-target_prop="$3";
-current_env="";
-
-raw=$( cat "$1" | tr -s '\n' | tr '\n' '{');
-raw=$( echo ${raw//{[/">["} );
-raw=$( echo ${raw//{/"\t"} );
-
-for line in $(echo $raw | tr ">[" "\n[")
-do
-	# ========================================
-	# running through each line
-	# ========================================
-	for item in $(echo -e "$line" | tr "\t" "\n")
-	do
-		tmp_env=$(echo "$item" | grep -E "\[$target_env\]");
-		if [ -n "$tmp_env" ];
-		then
-			current_env="$tmp_env";
-			# ========================================
-			# returns the whole chunk of props for the given env.
-			# ========================================
-			if [ -z "$target_prop" ];
-			then
-				echo -e $( echo "${line//\[$target_env\]\\t/}") | tr "\t" "\n";
-				exit 1;
-			fi
-			continue;
-		fi
-
-		# ========================================
-		# keep trying to find the env you gave
-		# ========================================
-		new_env=$(echo "$item" | grep -E "\[*\]");
-		if [ -n "$new_env" ];
-		then
-			current_env="";
-			continue;
-		fi
-
-		if [ -n "$current_env" ];
-		then
-			# returns specific prop value
-			value=$(echo -e "$item" | grep -E "$target_prop=" | tr "=" "\t" | awk '{print $2}');
+	#
+	# in case of not providing group name
+	#
+	if [ -z "$target_env" ];
+	then
+		#
+		# find all envs
+		#
+		local all_envs=""
+		for line in $(cat $1)
+		do
+			local value=$(echo "$line" | grep -E "^\[[a-zA-Z0-9-_]+\]");
 			if [ -n "$value" ];
 			then
-				echo "$value";
-				exit 1;
+				value=$(echo ${value//[/""});
+				value=$(echo ${value//]/""});
+				if [ -z "$all_envs" ];
+				then
+					all_envs="$value";
+				else
+					all_envs+="\n$value";
+				fi
 			fi
-		fi
-	done
-done
+		done
 
-# ========================================
-# when a target prop is passed but has no value
-# ========================================
-if [ -n "$target_prop" -a -z "$value" ];
-then
-	exit 0;
-fi
+		if [ -z "$all_envs" ];
+			then
+			echo -e "\033[35mAny group found!\033[0m\nHit parse-config ?";
+		else
+			echo -e "$all_envs";
+		fi
+
+		exit 1;
+	fi
+
+	local target_prop="$3";
+	local current_env="";
+
+	local raw=$( cat "$1" | tr -s '\n' | tr '\n' '{');
+		raw=$( echo ${raw//{[/">["} );
+		raw=$( echo ${raw//{/"\t"} );
+		raw=$( echo ${raw//= /=} );
+		raw=$( echo ${raw// =/=} );
+
+	# for line in $(echo "$raw" | tr ">[" "\n[")
+	# do
+	# 	echo "$line";
+	# done
+	# exit 1;
+
+	for line in $(echo "$raw" | tr ">[" "\n[")
+	do
+		#
+		# running through each line
+		#
+		for item in $(echo -e "$line" | tr "\t" "\n")
+		do
+			local tmp_env=$(echo "$item" | grep -E "\[$target_env\]");
+			if [ -n "$tmp_env" ];
+			then
+				current_env="$line";
+				#
+				# returns the whole chunk of props for the given env.
+				#
+				if [ -z "$target_prop" ];
+				then
+					echo -e $( echo "${line//\[$target_env\]\\t/}") | tr "\t" "\n";
+					exit 1;
+				fi
+				continue;
+			fi
+
+			#
+			# keep trying to find the env you provided
+			#
+			local new_env=$(echo "$item" | grep -E "\[*\]");
+			if [ -n "$new_env" ];
+			then
+				current_env="";
+				continue;
+			fi
+
+			if [ -n "$current_env" ];
+			then
+				# returns specific prop value
+				value=$(echo -e "$item" | grep -E "$target_prop=" | tr "=" "\t" | awk '{print $2}');
+				if [ -n "$value" ];
+				then
+					echo "$value";
+					exit 1;
+				fi
+			fi
+		done
+	done
+
+	#
+	# when a target prop is passed but has no value
+	#
+	if [ -n "$target_prop" -a -z "$value" ];
+	then
+		exit 0;
+	fi
+}
+parse $@
