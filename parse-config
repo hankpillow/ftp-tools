@@ -70,9 +70,9 @@ then
 			value=$(echo ${value//]/""});
 			if [ -z "$all_envs" ];
 			then
-				all_envs="- $value";
+				all_envs="$value";
 			else
-				all_envs+="\n- $value";
+				all_envs+="\n$value";
 			fi
 		fi
 	done
@@ -81,7 +81,6 @@ then
 		then
 		echo -e "\033[35mAny group found!\033[0m\nHit parse-config ?";
 	else
-		echo -e "\033[32mPick a group name:\033[0m";
 		echo -e "$all_envs";
 	fi
 
@@ -112,7 +111,7 @@ do
 			if [ -z "$target_prop" ];
 			then
 				echo -e "\033[32mWe've found these properties for env\033[0m";
-				echo -e "$line" | tr "\t" "\n";
+				echo -e $( echo "${line//\[$target_env\]\\t/}") | tr "\t" "\n";
 				exit 1;
 			fi
 			continue;
