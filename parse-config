@@ -8,15 +8,18 @@ if [ "$1" = "?" ]
 		echo -e "  Igor almeida";
 		echo -e "";
 		echo -e "${B1}INFO${B2}";
-		echo -e "  Parse the config and find values";
+		echo -e "  Parse the config file";
 		echo -e "  The config file must be formatted in the schema below";
 		echo -e "";
 		echo -e "  [env_name]";
-		echo -e "  prop1=value env 1";
-		echo -e "  prop2=value 2 env 1";
+		echo -e "  prop1=value of prop1 at env_name1";
+		echo -e "  prop2=value of prop2 at env_name1";
 		echo -e "";
-		echo -e "  [env_name2]";
-		echo -e "  prop1=value env 2";
+		echo -e "  [env-name2]";
+		echo -e "  prop1=value of prop1 at env-name2";
+		echo -e "";
+		echo -e "  [env3]";
+		echo -e "  prop1=value of prop1 at env3";
 		echo -e "";
 		echo -e "${B1}USAGE${B2}";
 		echo -e "  parse-config file.config";
@@ -43,40 +46,88 @@ fi
 
 if [ ! -f "$1" ];
 then
-	echo "ERROR: file: '$1' not found.";
+	echo -e "\033[31mERROR:\033[0m Config file not found on: '$1'";
 	exit 1;
 fi
 
+target_env="$2";
+
+# ========================================
+# in case of not providing group name
+# ========================================
+if [ -z "$target_env" ];
+then
+	# ========================================
+	# find all envs
+	# ========================================
+	all_envs=""
+	for line in $(cat $1)
+	do
+		value=$(echo "$line" | grep -E "^\[[a-zA-Z0-9-_]+\]");
+		if [ -n "$value" ];
+		then
+			value=$(echo ${value//[/""});
+			value=$(echo ${value//]/""});
+			if [ -z "$all_envs" ];
+			then
+				all_envs="- $value";
+			else
+				all_envs+="\n- $value";
+			fi
+		fi
+	done
+
+	if [ -z "$all_envs" ];
+		then
+		echo -e "\033[35mAny group found!\033[0m\nHit parse-config ?";
+	else
+		echo -e "\033[32mPick a group name:\033[0m";
+		echo -e "$all_envs";
+	fi
+
+	exit 1;
+fi
+
+target_prop="$3";
+current_env="";
+
 raw=$( cat "$1" | tr -s '\n' | tr '\n' '{');
-raw=$( echo ${raw//{[/"@["} );
+raw=$( echo ${raw//{[/">["} );
 raw=$( echo ${raw//{/"\t"} );
 
-target_env="$2";
-target_prop="$3";
-
-current_env="";
-for line in $(echo $raw | tr "@[" "\n[")
+for line in $(echo $raw | tr ">[" "\n[")
 do
+	# ========================================
+	# running through each line
+	# ========================================
 	for item in $(echo -e "$line" | tr "\t" "\n")
 	do
-		e=$(echo "$item" | grep -E "\[$target_env\]");
-		if [ -n "$e" ];
+		tmp_env=$(echo "$item" | grep -E "\[$target_env\]");
+		if [ -n "$tmp_env" ];
 		then
-			current_env="$e";
-			# returns the whole chunk
+			current_env="$tmp_env";
+			# ========================================
+			# returns the whole chunk of props for the given env.
+			# ========================================
 			if [ -z "$target_prop" ];
 			then
+				echo -e "\033[32mWe've found these properties for env\033[0m";
 				echo -e "$line" | tr "\t" "\n";
 				exit 1;
 			fi
 			continue;
 		fi
+
+		# ========================================
+		# keep trying to find the env you gave
+		# ========================================
 		new_env=$(echo "$item" | grep -E "\[*\]");
 		if [ -n "$new_env" ];
 		then
 			current_env="";
 			continue;
 		fi
+
 		if [ -n "$current_env" ];
 		then
 			# returns specific prop value
@@ -90,33 +141,10 @@ do
 	done
 done
 
+# ========================================
 # when a target prop is passed but has no value
+# ========================================
 if [ -n "$target_prop" -a -z "$value" ];
 then
-	echo "";
-	exit 1;
+	exit 0;
 fi
-
-# find all envs
-all_envs=""
-for line in $(cat $1)
-do
-	value=$(echo "$line" | grep -E "^\[[a-zA-Z0-9\-_]+\]");
-	if [ -n "$value" ];
-	then
-		value=$(echo ${value//[/""});
-		value=$(echo ${value//]/""});
-		if [ -z "$all_envs" ];
-		then
-			all_envs="$value";
-		else
-			all_envs+="\t$value";
-		fi
-	fi
-done
-# show nothing when any env is found.
-if [ -z "$all_envs" ];
-	then
-	exit 1;
-fi
-echo -e "$all_envs";
