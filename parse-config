@@ -110,7 +110,6 @@ do
 			# ========================================
 			if [ -z "$target_prop" ];
 			then
-				echo -e "\033[32mWe've found these properties for env\033[0m";
 				echo -e $( echo "${line//\[$target_env\]\\t/}") | tr "\t" "\n";
 				exit 1;
 			fi
