@@ -46,7 +46,7 @@ function parse {
 
 		if [ -z "$all_envs" ];
 			then
-			echo -e "\033[35mAny group found!\033[0m\nHit parse-config ?";
+			exit 0;
 		else
 			echo -e "$all_envs";
 		fi
