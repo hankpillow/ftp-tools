@@ -1,45 +1,10 @@
-# !/bin/bash
+# !/bin/bash -x
 if [ "$1" = "?" ]
 	then
 		B1="\033[1m";
 		B2="\033[0m";
-		echo -e "";
-		echo -e "${B1}AUTHOR${B2}";
-		echo -e "  Igor almeida";
-		echo -e "";
-		echo -e "${B1}INFO${B2}";
-		echo -e "  Parse the config file";
-		echo -e "  The config file must be formatted in the schema below";
-		echo -e "";
-		echo -e "  [env_name]";
-		echo -e "  prop1=value of prop1 at env_name1";
-		echo -e "  prop2=value of prop2 at env_name1";
-		echo -e "";
-		echo -e "  [env-name2]";
-		echo -e "  prop1=value of prop1 at env-name2";
-		echo -e "";
-		echo -e "  [env3]";
-		echo -e "  prop1=value of prop1 at env3";
-		echo -e "";
-		echo -e "${B1}USAGE${B2}";
-		echo -e "  parse-config file.config";
-		echo -e "";
-		echo -e "${B1}EXAMPLE${B2}";
-		echo -e "  parse-config ftp.config env_name";
-		echo -e "  -> returns:";
-		echo -e "  \t[env_name]";
-		echo -e "  \tprop1=value env 1";
-		echo -e "  \tprop2=value 2 env 1";
-		echo -e "";
-		echo -e "${B1}EXAMPLE${B2}";
-		echo -e "  parse-config ftp.config env_name prop1";
-		echo -e "  -> returns 'value env 1'"
-		echo -e "";
-		echo -e "${B1}EXAMPLE${B2}";
-		echo -e "  parse-config ftp.config";
-		echo -e "  -> returns"
-		echo -e "  \t[env_name]";
-		echo -e "  \t[env_name2]";
+		echo -e "${B1}More info${B2}";
+		echo -e "https://github.com/hankpillow/ftp-tools";
 		echo -e "";
 		exit 1;
 fi
@@ -120,7 +85,7 @@ function parse {
 				#
 				if [ -z "$target_prop" ];
 				then
-					echo -e $( echo "${line//\[$target_env\]\\t/}") | tr "\t" "\n";
+					echo -e $( echo "${line//\[$target_env\]\\t/}") | tr "\t" "\n" | tr "=" "\t" | awk '{print $1}';
 					exit 1;
 				fi
 				continue;
