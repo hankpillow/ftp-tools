@@ -1,4 +1,4 @@
-###Following the explanation for all commands:
+#Following the explanation for all commands:
 
 * ##parse-config
 
@@ -16,9 +16,7 @@
 	prop2=value4
 	```
 
-
-
-	* *The "[group]" notation allows: `a-zA-Z0-9-_`*
+	* *The `[group] notation allows: `a-zA-Z0-9-_`*
 
 	###usage:
 
@@ -62,21 +60,21 @@
 
 * ###test-config
 
-	The ftp.config file is a simple text file in which you fill some server's fields.	The expected format for this document is:
+	This script will check for a `remote.cfg` in the same scope the script was called and validate it.
 
-	```
-	[server1]
-	hots=yourhost.com
-	user=username
-	root=/home/public_html/
+	If the `remote.cfg` file was found a new one will be created.
 
-	[server2]
-	hots=yourhost2.com
-	user=username2
-	root=/home/static_html/
-	```
+	This script will check if all expected properties exists.
 
-	Allowed properties
+	They are:
+
+	* `host` - server host. ie: `foo.server.com`
+	* `port` - server port. ie: `123`
+	* `user` - ssh user name. ie: `hank`. when using bind addres, host usually loks like `user@123.45.67.89`
+	* `root` - the root path when connect. ex `/stage/foo/`. see [connect](#connect)
+	* `bind` - to bind the host address (`ssh -L` way). ie: `8012:123.456.789.001:8034`
+
+	If you won't use some properties, just let them empty. Missing properties will stop the execution.
 
 * ###connect
 
