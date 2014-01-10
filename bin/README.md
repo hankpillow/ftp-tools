@@ -70,7 +70,7 @@
 
 	* `host` - server host. ie: `foo.server.com`
 	* `port` - server port. ie: `123`
-	* `user` - ssh user name. ie: `hank`. when using bind addres, host usually loks like `user@123.45.67.89`
+	* `user` - ssh user name. ie: `hank`.
 	* `root` - the root path when connect. ex `/stage/foo/`. see [connect](#connect)
 	* `bind` - to bind the host address (`ssh -L` way). ie: `8012:123.456.789.001:8034`
 
@@ -78,7 +78,7 @@
 
 * ###connect
 
-	Just an alias to ssh using the ftp.config settings
+	This script will first run [test-config](#test-config) then the proper script to connect via ssh.
 
 * ###put
 

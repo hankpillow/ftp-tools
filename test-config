@@ -28,7 +28,7 @@ function test {
 				then
 					found=1
 					value=$(. "$dirname/parse-config" $config $input "$cprop")
-					echo -e " - $cprop = $value"
+					echo -e "\033[32m ✔ \033[0m$cprop = $value"
 					eval export "${cprop}=$value"
 					break
 				fi
@@ -75,7 +75,12 @@ function test {
 				echo -e "\033[32m✔\033[0m $input"
 				local config_props=$(. "$dirname/parse-config" $config $input)
 				validate
-				echo -e "\033[32m✔\033[0m expected properties passed."
+				param_port=""
+				if [ "$port" != "" ];
+					then
+					param_port="-p $port"
+
+				fi
 				break;
 			fi
 
