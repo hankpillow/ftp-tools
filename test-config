@@ -3,86 +3,106 @@ if [ "$1" = "?" ]
 	then
 		B1="\033[1m";
 		B2="\033[0m";
-		echo -e "";
-		echo -e "${B1}AUTHOR${B2}";
-		echo -e "  Igor almeida";
-		echo -e "";
-		echo -e "${B1}INFO${B2}";
-		echo -e "  Checks whether the ftp.config is created and if its filled properly.";
-		echo -e "  When not found, the ftp.config is created in the scope as the script was called.";
-		echo -e "  It returns nothing when no warning or error is found.";
-		echo -e "  Type 'parse-config ?' for more information.";
-		echo -e "";
-		echo -e "${B1}USAGE${B2}";
-		echo -e "  test-config";
+		echo -e "${B1}More info${B2}";
+		echo -e "https://github.com/hankpillow/ftp-tools";
 		echo -e "";
 		exit 1;
 fi
 
-ftp_config=$(echo `pwd`)"/ftp.config"
+function test {
 
-if [ -e "$ftp_config" ]
-then
+	local config=$(echo `pwd`)"/remote.cfg"
+	local expected=("host" "port" "user" "root" "bind")
+	local init_envs=("[stage]" "[prod]")
 
-	dirname=`dirname $0`
-	envs=$(. "$dirname/parse-config" $ftp_config)
+	function validate {
 
-	if [ -z "$envs" ];
-		then
-		echo -e "ERROR: Fill the $ftp_config properly."
-		exit 1;
-	fi
+		local found=0;
 
-	envs_arr=($(echo -e "$envs" | awk '{print $0 }'))
-	if [ ${#envs_arr[@]} == "1" ];
-	then
-		host=$(. "$dirname/parse-config" $ftp_config "$envs" host)
-		user=$(. "$dirname/parse-config" $ftp_config "$envs" user)
-		root=$(. "$dirname/parse-config" $ftp_config "$envs" root)
-		port=$(. "$dirname/parse-config" $ftp_config "$envs" port)
-	else
-		echo -e "These are your environment options: ($(echo "$envs" | tr "\t" ", "))"
-		echo -n "which one whould you like to use? "
-		read input;
-
-		for (( i = 0 ; i < ${#envs_arr[@]} ; i++ )) do
-			found=$(echo ${envs_arr[$i]} | grep -E "$input")
-			if [ -n "$found" ];
+		for prop in "${expected[@]}"
+		do
+			for cprop in $(echo -e "$config_props" | tr "\t" "\n")
+			do
+				found=0
+				if [ "$cprop" == "$prop" ]
+				then
+					found=1
+					value=$(. "$dirname/parse-config" $config $input "$cprop")
+					echo -e " - $cprop = $value"
+					eval export "${cprop}=$value"
+					break
+				fi
+			done
+			if [ "$found" -eq "0" ]
 			then
-				host=$(. "$dirname/parse-config" $ftp_config "$input" host)
-				user=$(. "$dirname/parse-config" $ftp_config "$input" user)
-				root=$(. "$dirname/parse-config" $ftp_config "$input" root)
-				port=$(. "$dirname/parse-config" $ftp_config "$input" port)
-				break;
+				echo -e "\033[31m✘ \033[0m Missing property '$prop'."
+				exit 1;
 			fi
 		done
-		
+	}
+
+	if [ -e "$config" ]
+	then
+
+		local dirname=`dirname $0`
+		local envs=$(. "$dirname/parse-config" $config)
+
+		if [ -z "$envs" ];
+			then
+			echo -e "\033[31mERROR:\033[0m Fill the $config properly."
+			exit 0;
+		fi
+
+		envs_arr=($(echo -e "$envs" | awk '{print $0 }'))
+
+		echo -e "\033[33mFollowing all related groups:\033[0m"
+		echo -e "$(echo "$envs" | tr "\t" ", ")"
+		echo -n "* Pick a group name: "
+		read input;
+
+		if [ -z "$input" ]
+			then
+			echo -e "\033[31mbye!\033[0m"
+			exit 0
+		fi
+
+		for (( i = 0 ; i < ${#envs_arr[@]} ; i++ ))
+		do
+			found=$(echo ${envs_arr[$i]} | grep -E "$input")
+
+			if [ -n "$found" ];
+			then
+				echo -e "\033[32m✔\033[0m $input"
+				local config_props=$(. "$dirname/parse-config" $config $input)
+				validate
+				echo -e "\033[32m✔\033[0m expected properties"
+				break;
+			fi
+
+		done
+
 		if [ -z "$found" ];
 		then
-			echo "Environment not found!"
+			echo -e "\033[31m[$input] not found!\033[0m"
 			exit 1;
 		fi
-	fi
 
-	if [ -z "$host" -o -z "$user" ];
-	then
-		echo -e "ERROR: Fill the $ftp_config properly."
-		exit 1;
 	else
-		if [ -z "$(echo "$root" | grep '/$')" ];
-			then
-			echo -e "WARNING: Would be better if the the 'root' param end up with a slash '/'.Your root is: $root"
-		fi
+
+		echo -e "\033[32m$config\033[0m created!"
+		echo -e "More info: \033[33mhttps://github.com/hankpillow/ftp-tools\033[0m"
+
+		for env_name in "${init_envs[@]}"
+		do
+			echo $env_name >> $config
+			for prop in "${expected[@]}"
+			do
+				echo $prop= >> $config
+			done
+			echo "" >> $config
+		done
+		exit 1;
 	fi
+}
 
-else
-	# creates a new file from the template.
-	echo -e "A new '$ftp_config' file will be created. Fill it with the proper values."
-	echo -e "[final]\nhost=\nport=\nuser=\nroot=" >> $ftp_config
-	exit 1;
-fi
-
-if [ -n "$port" ]; then
-	shopt -s expand_aliases
-	alias ssh="ssh -p $port"
-fi
+test $@
