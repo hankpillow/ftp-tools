@@ -1,0 +1,51 @@
+# !/bin/bash -x
+if [ "$1" = "?" ]
+	then
+		B1="\033[1m";
+		B2="\033[0m";
+		echo -e "${B1}More info${B2}";
+		echo -e "https://github.com/hankpillow/ftp-tools";
+		echo -e "";
+		exit 1;
+fi
+
+if [ -z "$1" ];
+	then
+	echo -e "\033[31mNothing to push\033[0m"
+	exit 0
+fi
+
+dirname=`dirname $0`
+. "$dirname/test-config"
+
+from="$1"
+to="$2"
+
+if [ -z "$to" ];
+	then
+	to="$root$from"
+else
+	to="$root$to"
+fi
+
+function push {
+
+	echo -e "Pushing files:"
+	echo -e "\033[33m$1\033[0m => \033[33m$2\033[0m"
+
+	echo -n "* Confirm? [y/n]: "
+	read input;
+
+	if [ -z "$input" -o "$input" != "y" ]
+		then
+		echo -e "\033[31mbye!\033[0m"
+		exit 0
+	fi
+
+	local cmd="scp -Cr $1 $user@$host:$2 $param_port"
+
+	echo -e "\033[31mpushing files:\033[0m\n$cmd";
+	eval "$cmd"
+}
+
+push "$from" "$to"

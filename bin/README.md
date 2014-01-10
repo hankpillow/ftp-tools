@@ -22,9 +22,7 @@
 
 	1. ####Getting groups:
 
-		```
-		$ parse-config file
-		```
+		`$ parse-config file`
 
 		Returns:
 
@@ -35,9 +33,7 @@
 
 	2. ####Getting properties:
 
-		```
-		$ parse-config file group-1
-		```
+		`$ parse-config file group-1`
 
 		Returns:
 
@@ -48,9 +44,7 @@
 
 	3. ####Getting values:
 
-		```
-		$ parse-config file group-1 prop1
-		```
+		`$ parse-config file group-1 prop1 `
 
 		Returns:
 
@@ -80,19 +74,33 @@
 
 	This script will first run [test-config](#test-config) then the proper script to connect via ssh.
 
-* ###put
+* ###push
 
-	Deploy a file or an entire folder to the remote server.*
+	Pushes a file/folder to the remote server.
 
-	```
-	$ put local-folder/. static/
-	```
-
-	Or
+	Considering the following `remote.cfg`
 
 	```
-	$ put file-name static/bin/
+	[stage]
+	host=ftp.my-server.com
+	port=
+	user=user
+	root=/www/
+	bind=
 	```
+
+	1. ####Pushing single file:
+
+		`$ push file1.txt`
+
+	2. ####Pushing many files:
+
+		`$ push file1.txt`
+
+	3. ####Pushing folder:
+
+		`$ push file1.txt`
+
 * ###download
 
 	Download a file or an entire folder from the remote server.*
